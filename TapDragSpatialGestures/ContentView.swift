@@ -10,12 +10,11 @@ import RealityKit
 import RealityKitContent
 
 struct ContentView: View {
-
-    @State var enlarge = false
-    @State var color: SimpleMaterial.Color = SimpleMaterial.Color.red
     
-    private let colors: [SimpleMaterial.Color] = [.red, .green, .blue, .systemBrown, .systemPurple, .systemMint]
     static var cubeEntity = Entity()
+    
+    @State var color: SimpleMaterial.Color = SimpleMaterial.Color.red
+    private let colors: [SimpleMaterial.Color] = [.red, .green, .blue, .systemBrown, .systemPurple, .systemMint]
     
     var body: some View {
         VStack {
