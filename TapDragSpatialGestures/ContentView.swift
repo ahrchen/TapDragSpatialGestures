@@ -12,29 +12,37 @@ import RealityKitContent
 struct ContentView: View {
 
     @State var enlarge = false
-
+    @State var color: SimpleMaterial.Color = SimpleMaterial.Color.red
+    
+    private let colors: [SimpleMaterial.Color] = [.red, .green, .blue, .systemBrown, .systemPurple, .systemMint]
+    static var cubeEntity = Entity()
+    
     var body: some View {
         VStack {
             RealityView { content in
                 // Add the initial RealityKit content
-                if let scene = try? await Entity(named: "Scene", in: realityKitContentBundle) {
-                    content.add(scene)
+                if let cube = try? await Entity(named: "Cube", in: realityKitContentBundle) {
+                    ContentView.cubeEntity = cube
+                    content.add(cube)
                 }
             } update: { content in
                 // Update the RealityKit content when SwiftUI state changes
-                if let scene = content.entities.first {
-                    let uniformScale: Float = enlarge ? 1.4 : 1.0
-                    scene.transform.scale = [uniformScale, uniformScale, uniformScale]
-                }
+                ContentView.cubeEntity.components[ModelComponent.self] = ModelComponent(mesh: .generateBox(size: 0.3), materials: [SimpleMaterial(color: color, isMetallic: false)])
             }
-            .gesture(TapGesture().targetedToAnyEntity().onEnded { _ in
-                enlarge.toggle()
-            })
-
-            VStack {
-                Toggle("Enlarge RealityView Content", isOn: $enlarge)
-                    .toggleStyle(.button)
-            }.padding().glassBackgroundEffect()
+            .gesture(
+                SpatialTapGesture()
+                    .targetedToAnyEntity()
+                    .onEnded({ _ in
+                        color = colors.randomElement()!
+                    })
+            )
+            .gesture(
+                DragGesture()
+                    .targetedToEntity(ContentView.cubeEntity)
+                    .onChanged({ value in
+                        ContentView.cubeEntity.position = value.convert(value.location3D, from: .local, to: ContentView.cubeEntity.parent!)
+                    })
+            )
         }
     }
 }
